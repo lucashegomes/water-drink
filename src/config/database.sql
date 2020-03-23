@@ -1,4 +1,4 @@
-CREATE DATABASE waterdrinken;
+﻿CREATE DATABASE waterdrinken;
 
 CREATE USER 'waterdrinken'@'localhost' IDENTIFIED BY 'waterdrinken';
 GRANT ALL PRIVILEGES ON waterdrinken.* TO 'waterdrinken'@'localhost';

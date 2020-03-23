@@ -1,4 +1,4 @@
-<?php
+Ôªø<?php
 
 class DrinksByUserController
 {
@@ -9,7 +9,7 @@ class DrinksByUserController
             $drinkByUserModel = new DrinksByUserModel();
             $drinkByUserModel->idUser = $arDataUser['ID_USER_USR'];
             $drinkByUserModel->mlDrinked = $data['drink_ml'];
-            $teste = $drinkByUserModel->insert();
+            $drinkByUserModel->insert();
             $countDrink = $drinkByUserModel->countDrink($arDataUser['ID_USER_USR']);
     
             $response = [
@@ -20,7 +20,7 @@ class DrinksByUserController
             ];
         } catch(Exception $e) {
             $response = [
-                'mensagem' => "Erro ao inserir quantidade de ·gua bebida: $e"
+                'mensagem' => "Erro ao inserir quantidade de √°gua bebida: $e"
             ];
         }
 
@@ -28,13 +28,13 @@ class DrinksByUserController
 
     }
 
-    public function userRankAction()
+    public function userRankingAction()
     {
         try {
-            $response = (new DrinksByUserModel())->getRank();
+            $response = (new DrinksByUserModel())->getRankingCurrentDate();
         } catch(Exception $e) {
             $response = [
-                'mensagem' => "Erro ao exibir rank: $e"
+                'mensagem' => "Erro ao exibir ranking: $e"
             ];
         }
 
@@ -44,10 +44,10 @@ class DrinksByUserController
     public function userHistoryAction($idUser)
     {
         try {
-            $response = (new DrinksByUserModel())->getHistory($idUser);
+            $response = (new DrinksByUserModel())->getHistoryByUser($idUser);
         } catch(Exception $e) {
             $response = [
-                'mensagem' => "Erro ao exibir o histÛrico do usu·rio: $e"
+                'mensagem' => "Erro ao exibir o hist√≥rico do usu√°rio: $e"
             ];
         }
 

@@ -1,4 +1,4 @@
-<?php
+Ôªø<?php
 
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
@@ -11,13 +11,13 @@ require_once __DIR__ . '/../models/UserModel.php';
 class UserController
 {
 
-    public function indexAction($idUser = 0, $token = '', $page = null)
+    public function indexAction($idUser, $token = '', $page = null)
     {
         try {
             $userModel = new UserModel();
             http_response_code(200);
 
-            if (!(empty($idUser) && empty($token))) {
+            if (!empty($idUser) || !empty($token)) {
                 $arDataUser = $userModel->getUser($idUser, $token);
                 $countDrink =  (new DrinksByUserModel())->countDrink($arDataUser['ID_USER_USR']);
 
@@ -40,7 +40,7 @@ class UserController
         } catch (Exception $e) {
             http_response_code(503);
             $response = [
-                'mensagem' => 'Erro ao criar usu·rio: ' . $e
+                'mensagem' => 'Erro ao criar usu√°rio: ' . $e
             ];
         }
 
@@ -54,39 +54,31 @@ class UserController
             $userModel->email = $data['email'] ?? '';
             $userModel->name = $data['name'] ?? '';
             $userModel->password = $data['password'] ?? '';
-            $countDuplicate = $userModel->countDuplicate($userModel->email)['TOTAL'];
 
-            if ($countDuplicate > 0) {
-                http_response_code(500);
-                $response = ['mensagem' => 'Usu·rio j· cadastrado.'];
-            } else {
-                $userModel->insert();
-                http_response_code(201);
-                $response = ['mensagem' => 'Usu·rio cadastrado com sucesso.'];
-            }
+            $userModel->insert();
+            http_response_code(201);
+            $response = ['mensagem' => 'Usu√°rio cadastrado com sucesso.'];
 
         } catch (Exception $e) {
             http_response_code(503);
-            $response = ['mensagem' => 'Erro ao criar usu·rio: ' . $e];
+            $response = ['mensagem' => 'Erro ao criar usu√°rio: ' . $e];
         }
 
         echo json_encode($response);
     }
 
-    //falta terminar
-    public function putAction($token = '', $data = [])
+    public function putAction($token, $data = [])
     {
         try {
             $user = new UserModel();
             $user->email = $data['email'] ?? '';
             $user->name = $data['name'] ?? '';
             $user->password = $data['password'] ?? '';
-            $user->token = $data['token'] ?? '';
-            $user->insert();
+            $user->update($token);
         } catch (Exception $e) {
             http_response_code(503);
             echo json_encode([
-                'mensagem' => 'Erro ao criar usu·rio: ' . $e
+                'mensagem' => 'Erro ao criar usu√°rio: ' . $e
             ]);
         }
     }
@@ -104,7 +96,7 @@ class UserController
         } catch (Exception $e) {
             http_response_code(503);
             $response = [
-                'mensagem' => 'Erro ao criar usu·rio: ' . $e
+                'mensagem' => 'Erro ao criar usu√°rio: ' . $e
             ];
         }
 

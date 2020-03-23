@@ -1,10 +1,10 @@
-<?php
+ï»¿<?php
 
-require_once __DIR__ . '/../config/DBConnection.php';
+require_once __DIR__ . '/../models/Model.php';
 
-class UserModel
+class UserModel extends Model
 {
-    private $_table = "USER";
+    protected $_table = "USER";
 
     public $info = [
         'ST_NAME_USR',
@@ -18,21 +18,40 @@ class UserModel
     public $password = '';
     public $token = '';
 
-    // Necessário verificar se o email já existe
     public function insert()
     {
         $columns = implode(",", $this->info);
         $query = ("INSERT INTO " . $this->_table . "($columns) 
             VALUES (:ST_NAME_USR, :ST_EMAIL_USR, :ST_PASSWORD_USR, :ST_TOKEN_USR)");
 
+        if ($this->countUser($this->email) > 0) {
+            throw new Exception('UsuÃ¡rio jÃ¡ cadastrado.');
+        }
+
         $this->_insertAndUpdate($query, true);
     }
 
-    public function update($idUser)
+    public function update($token = '')
     {
-        $query = "UPDATE " . $this->_table . " SET name = "; //Falta terminar
+        $columnsToSet = [];
 
-        $this->_insertAndUpdate($query);
+        if ($this->email) {
+            $columnsToSet [] = " ST_EMAIL_USR = '" . $this->email . "'";
+        }
+
+        if ($this->name) {
+            $columnsToSet [] = " ST_NAME_USR = '" . $this->name . "'";
+        }
+
+        if ($this->password && $this->email) {
+            $columnsToSet [] = " ST_PASSWORD_USR = '" . sha1($this->email . $this->password) . "'";
+        }
+
+        if (count($columnsToSet) > 0 && !empty($token)) {
+            $columnsToSet = implode(",", $columnsToSet);
+            $query = "UPDATE " . $this->_table . " SET $columnsToSet WHERE ST_TOKEN_USR = '$token'";
+            $this->_insertAndUpdate($query);
+        }
     }
 
     public function delete(int $idUser = 0)
@@ -43,38 +62,6 @@ class UserModel
             $stmt = $connection->getConnection()->prepare($query);
             return $stmt->execute();
         }
-    }
-
-    public function select($columns = [], $where = [], $page = null)
-    {
-        $query = "SELECT * FROM " . $this->_table;
-
-        if (count($columns) > 0) {
-            $columns = implode(",", $columns);
-            $query = "SELECT $columns FROM " . $this->_table;
-        }
-
-        if (count($where) > 0) {
-            $where = implode(" AND ", $where);
-            $query .= " WHERE ($where)";
-        }
-
-        if (!empty($page)) {
-            $query .= " LIMIT 4 OFFSET $page";
-        }
-
-        try {
-            $result = (new DBConnection())
-                ->getConnection()
-                ->query($query)
-                ->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            $result[] = "PDOException: $e";
-        } catch (Exception $e) {
-            $result[] = "Exception: $e";
-        }
-
-        return count($result) > 1 ? $result : $result[0];
     }
 
     public function loginUser($data = [])
@@ -90,7 +77,7 @@ class UserModel
                 $password = sha1($data['email'] . $data['password']);
                 if ($password != $arDataUser['ST_PASSWORD_USR']) {
                     return [
-                        'mensagem' => 'Senha inválida.'
+                        'mensagem' => 'Senha invÃ¡lida.'
                     ];
                 }
 
@@ -98,35 +85,40 @@ class UserModel
             }
 
             return [
-                'mensagem' => 'Usuário não encontrado.'
+                'mensagem' => 'UsuÃ¡rio nÄƒo encontrado.'
             ];
         }
     }
 
-    public function getUser(int $idUser = 0, string $token = '')
+    public function getUser($idUser = 0, $token = '')
     {
-        if (!(empty($idUser) && empty($token))) {
-            $where = [
-                "ST_TOKEN_USR = '" . $token . "'",
-                "ID_USER_USR = " . $idUser,
-            ];
-
-            return $this->select(null, $where);
+        if (!empty($idUser)) {
+            $where [] = ["ID_USER_USR = $idUser"];
         }
+
+        if (!empty($token)) {
+            $where [] = ["ST_TOKEN_USR = '" . $token . "'"];
+        }
+
+        return $this->select(null, $where);
     }
 
-    public function countDuplicate(string $email)
+    public function countUser($email, $token = '')
     {
+        $columns = [
+            'COUNT(*) AS TOTAL'
+        ];
+
         if (!empty($email)) {
-            $columns = [
-                'COUNT(*) AS TOTAL'
-            ];
-            $where = [
-                "ST_EMAIL_USR = '" . $email . "'",
-            ];
-
-            return $this->select($columns, $where);
+            $where [] = ["ST_EMAIL_USR = '" . $email . "'"];
         }
+        
+        if (!empty($token)) {
+            $where [] = ["ST_TOKEN_USR = '" . $token . "'"];
+        }
+
+        $countUser = $this->select($columns, $where);
+        return $countUser['TOTAL'];
     }
 
     private function _insertAndUpdate($query = '', $isCreate = false)
