@@ -19,7 +19,7 @@ class UserModel
     public $token = '';
 
     // Necessário verificar se o email já existe
-    public function create()
+    public function insert()
     {
         $columns = implode(",", $this->info);
         $query = ("INSERT INTO " . $this->_table . "($columns) 
@@ -45,7 +45,7 @@ class UserModel
         }
     }
 
-    public function select($columns = [], $where = [])
+    public function select($columns = [], $where = [], $page = null)
     {
         $query = "SELECT * FROM " . $this->_table;
 
@@ -57,6 +57,10 @@ class UserModel
         if (count($where) > 0) {
             $where = implode(" AND ", $where);
             $query .= " WHERE ($where)";
+        }
+
+        if (!empty($page)) {
+            $query .= " LIMIT 4 OFFSET $page";
         }
 
         try {
@@ -78,10 +82,24 @@ class UserModel
         if (count($data) > 0) {
             $where = [
                 "ST_EMAIL_USR = '" . $data['email'] . "'",
-                "ST_PASSWORD_USR = '" . sha1($data['email'] . $data['password']) . "'",
             ];
 
-            return $this->select(null, $where);
+            $arDataUser = $this->select(null, $where);
+
+            if(count($arDataUser) > 0 && $arDataUser['ST_PASSWORD_USR']) {
+                $password = sha1($data['email'] . $data['password']);
+                if ($password != $arDataUser['ST_PASSWORD_USR']) {
+                    return [
+                        'mensagem' => 'Senha inválida.'
+                    ];
+                }
+
+                return $arDataUser;
+            }
+
+            return [
+                'mensagem' => 'Usuário não encontrado.'
+            ];
         }
     }
 
@@ -94,6 +112,20 @@ class UserModel
             ];
 
             return $this->select(null, $where);
+        }
+    }
+
+    public function countDuplicate(string $email)
+    {
+        if (!empty($email)) {
+            $columns = [
+                'COUNT(*) AS TOTAL'
+            ];
+            $where = [
+                "ST_EMAIL_USR = '" . $email . "'",
+            ];
+
+            return $this->select($columns, $where);
         }
     }
 

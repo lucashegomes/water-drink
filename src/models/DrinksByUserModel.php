@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../config/DBConnection.php';
+
 class DrinksByUserModel
 {
     private $_table = "DRINKS_BY_USER";
@@ -27,13 +29,6 @@ class DrinksByUserModel
         }
     }
 
-    public function update($idUser)
-    {
-        $query = "UPDATE " . $this->_table . " SET name = ";
-
-        $this->_insertAndUpdate($query);
-    }
-
     public function delete(int $idUser = 0)
     {
         if (!empty($idUser)) {
@@ -43,7 +38,7 @@ class DrinksByUserModel
         }
     }
 
-    public function select($columns = [], $where = [])
+    public function select($columns = [], $where = [], $join = [], $groupBy = [], $orderBy = [], $isOrderDesc = false)
     {
         $query = "SELECT * FROM " . $this->_table;
 
@@ -52,16 +47,31 @@ class DrinksByUserModel
             $query = "SELECT $columns FROM " . $this->_table;
         }
 
+        if (count($join) > 0) {
+            $join = implode(" LEFT JOIN ", $join);
+            $query .= " LEFT JOIN $join ";
+        }
+
         if (count($where) > 0) {
             $where = implode(" AND ", $where);
-            $query .= " WHERE ($where)";
+            $query .= " WHERE ($where) ";
+        }
+
+        if (count($groupBy) > 0) {
+            $groupBy = implode(",", $groupBy);
+            $query .= " GROUP BY $groupBy";
+        }
+
+        if (count($orderBy) > 0) {
+            $orderBy = implode(",", $orderBy);
+            $query .= " ORDER BY $orderBy" . ($isOrderDesc ? " DESC " : " ASC ");
         }
 
         try {
             $result = (new DBConnection())
                 ->getConnection()
                 ->query($query)
-                ->fetch();
+                ->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             $result[] = "PDOException: $e";
         } catch (Exception $e) {
@@ -78,25 +88,29 @@ class DrinksByUserModel
         }
     }
 
-    private function _insertAndUpdate($query = '', $isCreate = false)
+    public function getRank()
     {
-        if (empty($query)) {
-            return;
-        }
+        $columns = [
+            "ST_NAME_USR AS name",
+            "SUM(NM_MLDRINKED_DKS) AS drinked_ml"
+        ];
 
-        try {
-            $stmt = $this->connection->prepare($query);
-            $stmt->bindParam(':name', $this->name, PDO::PARAM_STR);
-            $stmt->bindParam(':email', $this->email, PDO::PARAM_STR);
+        $join = ["USER USING(ID_USER_USR)"];
+        $groupBy = ["ID_USER_USR"];
+        $orderBy = ["drinked_ml"];
 
-            if ($isCreate) {
-                $stmt->bindParam(':password', sha1($this->name . $this->email . $this->password), PDO::PARAM_STR);
-                $stmt->bindParam(':token', sha1(microtime()), PDO::PARAM_STR);
-            }
+        return $this->select($columns, [], $join, $groupBy, $orderBy, true);
+    }
 
-            $stmt->execute();
-        } catch (PDOException $e) {
-            throw $e;
-        }
+    public function getHistory(int $idUser)
+    {
+        $columns = [
+            'DATE_FORMAT(DT_REGISTER_DKS, "%d/%m/%Y %H:%i:%s") AS date',
+            "NM_MLDRINKED_DKS AS drinked_ml"
+        ];
+
+        $where = ["ID_USER_USR = $idUser"];
+
+        return $this->select($columns, $where);
     }
 }

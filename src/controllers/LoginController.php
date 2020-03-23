@@ -18,14 +18,22 @@ class LoginController
         }
 
         $arDataUser = (new UserModel())->loginUser($data);
-        $countDrink =  (new DrinksByUserModel())->countDrink($arDataUser['ID_USER_USR']);
+        
+        if (count($arDataUser) > 0) {
+            if ($arDataUser['mensagem']) {
+                $response = $arDataUser;
+            } else {
+                $countDrink =  (new DrinksByUserModel())->countDrink($arDataUser['ID_USER_USR']);
+                $response = [
+                    'token' => $arDataUser['ST_TOKEN_USR'],
+                    'iduser' => $arDataUser['ID_USER_USR'],
+                    'email' => $arDataUser['ST_EMAIL_USR'],
+                    'name' => $arDataUser['ST_NAME_USR'],
+                    'drink_counter' => $countDrink,
+                ];
+            }
+        }
 
-        echo json_encode([
-            'token' => $arDataUser['ST_TOKEN_USR'],
-            'iduser' => $arDataUser['ID_USER_USR'],
-            'email' => $arDataUser['ST_EMAIL_USR'],
-            'name' => $arDataUser['ST_NAME_USR'],
-            'drink_counter' => $countDrink,
-        ]);
+        echo json_encode($response);
     }
 }

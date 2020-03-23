@@ -11,16 +11,16 @@ require_once __DIR__ . '/../models/UserModel.php';
 class UserController
 {
 
-    public function indexAction($idUser = 0, $token = '')
+    public function indexAction($idUser = 0, $token = '', $page = null)
     {
         try {
             $userModel = new UserModel();
+            http_response_code(200);
 
             if (!(empty($idUser) && empty($token))) {
                 $arDataUser = $userModel->getUser($idUser, $token);
                 $countDrink =  (new DrinksByUserModel())->countDrink($arDataUser['ID_USER_USR']);
 
-                http_response_code(201);
                 $response = [
                     'iduser' => $arDataUser['ID_USER_USR'],
                     'name' => $arDataUser['ST_NAME_USR'],
@@ -35,7 +35,7 @@ class UserController
                     'ST_TOKEN_USR AS token',
                 ];
 
-                $response = $userModel->select($columns);
+                $response = $userModel->select($columns, [], $page);
             }
         } catch (Exception $e) {
             http_response_code(503);
@@ -50,18 +50,27 @@ class UserController
     public function postAction($data = [])
     {
         try {
-            $user = new UserModel();
-            $user->email = $data['email'] ?? '';
-            $user->name = $data['name'] ?? '';
-            $user->password = $data['password'] ?? '';
-            $user->token = $data['token'] ?? '';
-            $user->create();
+            $userModel = new UserModel();
+            $userModel->email = $data['email'] ?? '';
+            $userModel->name = $data['name'] ?? '';
+            $userModel->password = $data['password'] ?? '';
+            $countDuplicate = $userModel->countDuplicate($userModel->email)['TOTAL'];
+
+            if ($countDuplicate > 0) {
+                http_response_code(500);
+                $response = ['mensagem' => 'Usuário já cadastrado.'];
+            } else {
+                $userModel->insert();
+                http_response_code(201);
+                $response = ['mensagem' => 'Usuário cadastrado com sucesso.'];
+            }
+
         } catch (Exception $e) {
             http_response_code(503);
-            echo json_encode([
-                'mensagem' => 'Erro ao criar usuário: ' . $e
-            ]);
+            $response = ['mensagem' => 'Erro ao criar usuário: ' . $e];
         }
+
+        echo json_encode($response);
     }
 
     //falta terminar
@@ -73,7 +82,7 @@ class UserController
             $user->name = $data['name'] ?? '';
             $user->password = $data['password'] ?? '';
             $user->token = $data['token'] ?? '';
-            $user->create();
+            $user->insert();
         } catch (Exception $e) {
             http_response_code(503);
             echo json_encode([
@@ -100,31 +109,5 @@ class UserController
         }
 
         echo json_encode($response);
-    }
-
-    public function increaseDrinkAction($token, $data = [])
-    {
-        try {
-            $arDataUser = (new UserModel())->select([], ["ST_TOKEN_USR = '$token'"]);
-            $drinkByUserModel = new DrinksByUserModel();
-            $drinkByUserModel->idUser = $arDataUser['ID_USER_USR'];
-            $drinkByUserModel->mlDrinked = $data['drink_ml'];
-            $teste = $drinkByUserModel->insert();
-            $countDrink = $drinkByUserModel->countDrink($arDataUser['ID_USER_USR']);
-    
-            $response = [
-                'iduser' => $arDataUser['ID_USER_USR'],
-                'email' => $arDataUser['ST_EMAIL_USR'],
-                'name' => $arDataUser['ST_NAME_USR'],
-                'drink_counter' => $countDrink,
-            ];
-        } catch(Exception $e) {
-            $response = [
-                'mensagem' => "Erro ao inserir quantidade de água bebida: $e"
-            ];
-        }
-
-        echo json_encode($response);
-
     }
 }
