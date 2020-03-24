@@ -14,7 +14,7 @@ Create a new user
 POST /users/
 ```
 __Parameters__
-| __Parameter____ | __Required / Optional | __Description__                                                           | __Type__ |
+| __Parameter__ | __Required / Optional | __Description__                                                           | __Type__ |
 | ------------------ | --------------------- | ------------------------------------------------------------------------- | -------- |
 | email              | REQUIRED              | The user email that needs to be __unique__.                                   | String   |
 | name               | REQUIRED              | The full user name.                                                       | String   |
@@ -26,7 +26,7 @@ Login user
 POST /login/
 ```
 __Parameters__
-| __Parameter____ | __Required / Optional | __Description__                                                           | __Type__ |
+| __Parameter__ | __Required / Optional | __Description__                                                           | __Type__ |
 | ------------------ | --------------------- | ------------------------------------------------------------------------- | -------- |
 | email              | REQUIRED              | The user email.                                   | String   |
 | password           | REQUIRED              | The user password.                                                        | String   |
@@ -36,7 +36,7 @@ Login user
 POST /login/
 ```
 __Parameters__
-| __Parameter____ | __Required / Optional | __Description__                                                           | __Type__ |
+| __Parameter__ | __Required / Optional | __Description__                                                           | __Type__ |
 | ------------------ | --------------------- | ------------------------------------------------------------------------- | -------- |
 | email              | REQUIRED              | The user email.                                   | String   |
 | password           | REQUIRED              | The user password.                                                        | String   |
@@ -47,7 +47,7 @@ Get data from an user
 GET /users/:iduser
 ```
 __Parameters__
-| __Parameter____ | __Required / Optional | __Description__                                                           | __Type__ |
+| __Parameter__ | __Required / Optional | __Description__                                                           | __Type__ |
 | ------------------ | --------------------- | ------------------------------------------------------------------------- | -------- |
 | token              | REQUIRED              | User token generated after the login. <br>__OBS:__ Put on request `HEADER`                                   | String   |
 
@@ -57,7 +57,7 @@ Get data from all users
 GET /users/
 ```
 __Parameters__
-| __Parameter____ | __Required / Optional | __Description__                                                           | __Type__ |
+| __Parameter__ | __Required / Optional | __Description__                                                           | __Type__ |
 | ------------------ | --------------------- | ------------------------------------------------------------------------- | -------- |
 | token              | REQUIRED              | User token generated after the login. <br>__OBS:__ Put on request `HEADER`                                   | String   |
 
@@ -67,7 +67,7 @@ Change data from an user
 PUT /users/:iduser
 ```
 __Parameters__
-| __Parameter____ | __Required / Optional | __Description__                                                           | __Type__ |
+| __Parameter__ | __Required / Optional | __Description__                                                           | __Type__ |
 | ------------------ | --------------------- | ------------------------------------------------------------------------- | -------- |
 | token              | REQUIRED              | User token generated after the login. <br>__OBS:__ Put on request `HEADER`                                   | String   |
 | email              | OPTIONAL              | The user email that needs to be __unique__.                                   | String   |
@@ -81,7 +81,7 @@ Delete an user
 DELETE /users/:iduser
 ```
 __Parameters__
-| __Parameter____ | __Required / Optional | __Description__                                                           | __Type__ |
+| __Parameter__ | __Required / Optional | __Description__                                                           | __Type__ |
 | ------------------ | --------------------- | ------------------------------------------------------------------------- | -------- |
 | token              | REQUIRED              | User token generated after the login. <br>__OBS:__ Put on request `HEADER`                                   | String   |
 
@@ -91,7 +91,7 @@ Register water drinked in miligram
 POST /users/:iduser/drink
 ```
 __Parameters__
-| __Parameter____ | __Required / Optional | __Description__                                                           | __Type__ |
+| __Parameter__ | __Required / Optional | __Description__                                                           | __Type__ |
 | ------------------ | --------------------- | ------------------------------------------------------------------------- | -------- |
 | token              | REQUIRED              | User token generated after the login. <br>__OBS:__ Put on request `HEADER`                                   | String   |
 | drink_ml              | OPTIONAL              | Quantity of water drinked (in miligrams)`                                   | Integer   |
@@ -102,7 +102,7 @@ Ranking of users on current date
 GET /ranking/
 ```
 __Parameters__
-| __Parameter____ | __Required / Optional | __Description__                                                           | __Type__ |
+| __Parameter__ | __Required / Optional | __Description__                                                           | __Type__ |
 | ------------------ | --------------------- | ------------------------------------------------------------------------- | -------- |
 | token              | REQUIRED              | User token generated after the login. <br>__OBS:__ Put on request `HEADER`                                   | String   |
 
@@ -112,6 +112,6 @@ Drink's history of an user
 GET /history/:iduser
 ```
 __Parameters__
-| __Parameter____ | __Required / Optional | __Description__                                                           | __Type__ |
+| __Parameter__ | __Required / Optional | __Description__                                                           | __Type__ |
 | ------------------ | --------------------- | ------------------------------------------------------------------------- | -------- |
 | token              | REQUIRED              | User token generated after the login. <br>__OBS:__ Put on request `HEADER`                                   | String   |
