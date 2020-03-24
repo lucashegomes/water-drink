@@ -47,9 +47,9 @@ function messageError($message = '', $httpResponseCode = 500)
  *
  * @return void
  */
-function checkToken()
+function checkToken($token = '')
 {
-    if (empty($request['token'])) {
+    if (empty($token)) {
         messageError("Usuário não autenticado. Informar o token para continuar.");
     }
 }
@@ -65,7 +65,7 @@ $data = json_decode(file_get_contents('php://input'), true);
 if ($request[0] == 'users') {
 
     if (isset($request[1]) && is_numeric($request[1])) {
-        checkToken();
+        checkToken($request['token']);
         /**
          * Register quantity of water drinked
          */
@@ -84,6 +84,7 @@ if ($request[0] == 'users') {
          * Edit especific user
          */
         if ($request['method'] == 'PUT') {
+            $data['iduser'] = (isset($request[1]) && is_numeric($request[1])) ? $request[1] : null;
             return (new UserController())->putAction($request['token'], $data);
         }
 
@@ -110,7 +111,7 @@ if ($request[0] == 'users') {
      * Get all users with / without pagination
      */
     if ($request['method'] == 'GET') {
-        checkToken();
+        checkToken($request['token']);
         $page = ($request[1] == 'pagina' && isset($request[2]) && is_numeric($request[2])) ? $request[2] : null;
         return (new UserController())->indexAction(null, null, $page);
     }

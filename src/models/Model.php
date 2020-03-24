@@ -69,12 +69,12 @@ abstract class Model
             $connection = new DBConnection();
             $result = $connection->getConnection()->query($query)->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            $result[] = "PDOException: $e";
+            $result[] = "PDOException: " . $e->getMessage();
         } catch (Exception $e) {
-            $result[] = "Exception: $e";
+            $result[] = "Exception: " . $e->getMessage();
         }
 
-        return $result;
+        return count($result) > 1 ? $result : $result[0];
     }
 
 }

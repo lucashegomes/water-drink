@@ -13,6 +13,7 @@ class UserModel extends Model
         'ST_TOKEN_USR',
     ];
 
+    public $idUser = '';
     public $email = '';
     public $name = '';
     public $password = '';
@@ -47,7 +48,13 @@ class UserModel extends Model
             $columnsToSet [] = " ST_PASSWORD_USR = '" . sha1($this->email . $this->password) . "'";
         }
 
-        if (count($columnsToSet) > 0 && !empty($token)) {
+        if (count($columnsToSet) > 0 && !(empty($token) && empty($this->idUser))) {
+            $arDataUser = (new UserModel())->getUser(false, $token);
+
+            if (count($arDataUser) > 0 && $arDataUser['ID_USER_USR'] != $this->idUser) {
+                throw new Exception('O token não pertence ao usuário informado.');
+            }
+
             $columnsToSet = implode(",", $columnsToSet);
             $query = "UPDATE " . $this->_table . " SET $columnsToSet WHERE ST_TOKEN_USR = '$token'";
             $this->_insertAndUpdate($query);
@@ -71,7 +78,7 @@ class UserModel extends Model
                 "ST_EMAIL_USR = '" . $data['email'] . "'",
             ];
 
-            $arDataUser = $this->select(null, $where);
+            $arDataUser = $this->select([], $where);
 
             if(count($arDataUser) > 0 && $arDataUser['ST_PASSWORD_USR']) {
                 $password = sha1($data['email'] . $data['password']);
@@ -93,20 +100,18 @@ class UserModel extends Model
     public function getUser($idUser = 0, $token = '')
     {
         if (!empty($idUser)) {
-            $where [] = ["ID_USER_USR = $idUser"];
+            $where [] = "ID_USER_USR = $idUser";
+        } elseif (!empty($token)) {
+            $where [] = "ST_TOKEN_USR = '" . $token . "'";
         }
 
-        if (!empty($token)) {
-            $where [] = ["ST_TOKEN_USR = '" . $token . "'"];
-        }
-
-        return $this->select(null, $where);
+        return $this->select([], $where);
     }
 
     public function countUser($email, $token = '')
     {
         $columns = [
-            'COUNT(*) AS TOTAL'
+            'COUNT(*)'
         ];
 
         if (!empty($email)) {
@@ -117,8 +122,7 @@ class UserModel extends Model
             $where [] = "ST_TOKEN_USR = '" . $token . "'";
         }
 
-        $countUser = $this->select($columns, $where);
-        return $countUser['TOTAL'];
+        return array_shift(array_values($this->select($columns, $where)));;
     }
 
     private function _insertAndUpdate($query = '', $isCreate = false)
@@ -142,7 +146,7 @@ class UserModel extends Model
 
             $stmt->execute();
         } catch (PDOException $e) {
-            throw $e;
+            throw new Exception("Erro ao salvar usuário: ", $e->getMessage());
         }
     }
 }

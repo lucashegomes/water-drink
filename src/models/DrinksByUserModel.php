@@ -47,7 +47,7 @@ class DrinksByUserModel extends Model
             $stmt->bindParam(':NM_MLDRINKED_DKS', $this->mlDrinked, PDO::PARAM_INT);
             $stmt->execute();
         } catch (PDOException $e) {
-            throw new Exception("Erro ao inserir quantidade de água bebida: ", $e);
+            throw new Exception("Erro ao inserir quantidade de água bebida: ", $e->getMessage());
         }
     }
 
@@ -60,7 +60,7 @@ class DrinksByUserModel extends Model
     public function countDrink(int $idUser)
     {
         if (!empty($idUser)) {
-            return $this->select(["COUNT(*)"], ["ID_USER_USR = $idUser"])[0];
+            return array_shift(array_values($this->select(["COUNT(*)"], ["ID_USER_USR = $idUser"])));
         }
     }
 
@@ -76,7 +76,7 @@ class DrinksByUserModel extends Model
             "SUM(NM_MLDRINKED_DKS) AS drinked_ml"
         ];
 
-        $where = ["DT_REGISTER_DKS = DATE(NOW())"];
+        $where = ["DT_REGISTER_DKS >= DATE(NOW())"];
         $join = ["USER USING(ID_USER_USR)"];
         $groupBy = ["ID_USER_USR"];
         $orderBy = ["drinked_ml DESC"];

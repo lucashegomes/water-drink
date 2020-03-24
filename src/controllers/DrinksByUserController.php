@@ -32,7 +32,7 @@ class DrinksByUserController
             ];
         } catch(Exception $e) {
             $response = [
-                'mensagem' => "Erro ao inserir quantidade de água bebida: $e"
+                'mensagem' => "Erro ao inserir quantidade de água bebida: " . $e->getMessage()
             ];
         }
 
@@ -51,7 +51,7 @@ class DrinksByUserController
             $response = (new DrinksByUserModel())->getRankingCurrentDate();
         } catch(Exception $e) {
             $response = [
-                'mensagem' => "Erro ao exibir ranking: $e"
+                'mensagem' => "Erro ao exibir ranking: " . $e->getMessage()
             ];
         }
 
@@ -70,7 +70,7 @@ class DrinksByUserController
             $response = (new DrinksByUserModel())->getHistoryByUser($idUser);
         } catch(Exception $e) {
             $response = [
-                'mensagem' => "Erro ao exibir o histórico do usuário: $e"
+                'mensagem' => "Erro ao exibir o histórico do usuário: " . $e->getMessage()
             ];
         }
 

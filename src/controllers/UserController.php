@@ -22,8 +22,6 @@ class UserController
     {
         try {
             $userModel = new UserModel();
-            http_response_code(200);
-
             if (!empty($idUser) || !empty($token)) {
                 $arDataUser = $userModel->getUser($idUser, $token);
                 $countDrink =  (new DrinksByUserModel())->countDrink($arDataUser['ID_USER_USR']);
@@ -42,12 +40,12 @@ class UserController
                     'ST_TOKEN_USR AS token',
                 ];
 
-                $response = $userModel->select($columns, [], $page);
+                $response = $userModel->select($columns, [], [], [], [], $page);
             }
         } catch (Exception $e) {
             http_response_code(503);
             $response = [
-                'mensagem' => 'Erro ao criar usuário: ' . $e
+                'mensagem' => 'Erro ao criar usuário: ' . $e->getMessage()
             ];
         }
 
@@ -73,7 +71,7 @@ class UserController
             $response = ['mensagem' => 'Usuário cadastrado com sucesso.'];
         } catch (Exception $e) {
             http_response_code(503);
-            $response = ['mensagem' => 'Erro ao criar usuário: ' . $e];
+            $response = ['mensagem' => 'Erro ao criar usuário: ' . $e->getMessage()];
         }
 
         echo json_encode($response);
@@ -93,13 +91,19 @@ class UserController
             $user->email = $data['email'] ?? '';
             $user->name = $data['name'] ?? '';
             $user->password = $data['password'] ?? '';
+            $user->idUser = $data['iduser'] ?? '';
             $user->update($token);
+            $response = [
+                'mensagem' => 'Usuário atualizado com sucesso.'
+            ];
         } catch (Exception $e) {
             http_response_code(503);
-            echo json_encode([
-                'mensagem' => 'Erro ao criar usuário: ' . $e
-            ]);
+            $response = [
+                'mensagem' => 'Erro ao criar usuário: ' . $e->getMessage()
+            ];
         }
+
+        echo json_encode($response);
     }
 
     /**
@@ -113,15 +117,13 @@ class UserController
         try {
             $userModel = new UserModel();
             $userModel->delete($idUser);
-
-            http_response_code(200);
             $response = [
                 'mensagem' => 'Usuario removido com sucesso.'
             ];
         } catch (Exception $e) {
             http_response_code(503);
             $response = [
-                'mensagem' => 'Erro ao criar usuário: ' . $e
+                'mensagem' => 'Erro ao criar usuário: ' . $e->getMessage()
             ];
         }
 
