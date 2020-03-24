@@ -110,11 +110,11 @@ class UserModel extends Model
         ];
 
         if (!empty($email)) {
-            $where [] = ["ST_EMAIL_USR = '" . $email . "'"];
+            $where [] = "ST_EMAIL_USR = '" . $email . "'";
         }
         
         if (!empty($token)) {
-            $where [] = ["ST_TOKEN_USR = '" . $token . "'"];
+            $where [] = "ST_TOKEN_USR = '" . $token . "'";
         }
 
         $countUser = $this->select($columns, $where);

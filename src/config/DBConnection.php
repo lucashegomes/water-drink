@@ -8,6 +8,11 @@ class DBConnection
     private $_database = "waterdrinken";
     private $_connection = null;
 
+    /**
+     * Instance to the database $_database connection
+     *
+     * @return PDO
+     */
     public function getConnection()
     {
         try {

@@ -5,12 +5,19 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-require_once __DIR__ . '/../config/DBConnection.php';
 require_once __DIR__ . '/../models/UserModel.php';
 
 class UserController
 {
 
+    /**
+     * Get user or a list of users
+     *
+     * @param int $idUser User identity
+     * @param string $token Param to find user by token
+     * @param int $page Page to offset data from table
+     * @return JSON
+     */
     public function indexAction($idUser, $token = '', $page = null)
     {
         try {
@@ -47,6 +54,12 @@ class UserController
         echo json_encode($response);
     }
 
+    /**
+     * Create a new user
+     *
+     * @param array $data User information data to save 
+     * @return JSON
+     */
     public function postAction($data = [])
     {
         try {
@@ -58,7 +71,6 @@ class UserController
             $userModel->insert();
             http_response_code(201);
             $response = ['mensagem' => 'Usuário cadastrado com sucesso.'];
-
         } catch (Exception $e) {
             http_response_code(503);
             $response = ['mensagem' => 'Erro ao criar usuário: ' . $e];
@@ -67,6 +79,13 @@ class UserController
         echo json_encode($response);
     }
 
+    /**
+     * Edit user
+     *
+     * @param string $token Param to find logged user
+     * @param array $data User data that will be modify
+     * @return JSON
+     */
     public function putAction($token, $data = [])
     {
         try {
@@ -83,15 +102,21 @@ class UserController
         }
     }
 
+    /**
+     * Remove user
+     *
+     * @param int $idUser User identification
+     * @return JSON
+     */
     public function deleteAction($idUser = null)
     {
         try {
             $userModel = new UserModel();
             $userModel->delete($idUser);
-            
+
             http_response_code(200);
             $response = [
-                'mensagem' => 'Usuario removido com sucesso.' 
+                'mensagem' => 'Usuario removido com sucesso.'
             ];
         } catch (Exception $e) {
             http_response_code(503);

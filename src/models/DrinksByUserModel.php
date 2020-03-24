@@ -4,11 +4,32 @@ require_once __DIR__ . '/../models/Model.php';
 
 class DrinksByUserModel extends Model
 {
+    /**
+     * Database table name
+     *
+     * @var string
+     */
     protected $_table = "DRINKS_BY_USER";
 
-    public $idUser = '';
-    public $mlDrinked = '';
+    /**
+     * User identity
+     *
+     * @var int
+     */
+    public $idUser = 0;
 
+    /**
+     * Miligram drinked
+     *
+     * @var int
+     */
+    public $mlDrinked = 0;
+
+    /**
+     * Database table columns
+     *
+     * @var array
+     */
     public $info = [
         'ID_USER_USR',
         'NM_MLDRINKED_DKS',
@@ -20,7 +41,8 @@ class DrinksByUserModel extends Model
             $columns = implode(',', $this->info);
             $query = "INSERT INTO $this->_table ($columns) VALUES (:ID_USER_USR, :NM_MLDRINKED_DKS)";
 
-            $stmt = $this->getDbConnection()->prepare($query);
+            $connection = new DBConnection();
+            $stmt = $connection->getConnection()->prepare($query);
             $stmt->bindParam(':ID_USER_USR', $this->idUser, PDO::PARAM_INT);
             $stmt->bindParam(':NM_MLDRINKED_DKS', $this->mlDrinked, PDO::PARAM_INT);
             $stmt->execute();
@@ -29,6 +51,12 @@ class DrinksByUserModel extends Model
         }
     }
 
+    /**
+     * Count drink registers by user
+     *
+     * @param integer $idUser User identity
+     * @return PDO
+     */
     public function countDrink(int $idUser)
     {
         if (!empty($idUser)) {
@@ -36,6 +64,11 @@ class DrinksByUserModel extends Model
         }
     }
 
+    /**
+     * Get user ranking by miligram drink
+     *
+     * @return PDO
+     */
     public function getRankingCurrentDate()
     {
         $columns = [
@@ -51,7 +84,13 @@ class DrinksByUserModel extends Model
         return $this->select($columns, $where, $join, $groupBy, $orderBy);
     }
 
-    public function getHistoryByUser(int $idUser)
+    /**
+     * Get user history by id
+     *
+     * @param [type] $idUser User identity
+     * @return PDO
+     */
+    public function getHistoryByUser($idUser)
     {
         $columns = [
             'DATE_FORMAT(DT_REGISTER_DKS, "%d/%m/%Y %H:%i:%s") AS date',

@@ -11,12 +11,14 @@ require_once __DIR__ . '/../models/DrinksByUserModel.php';
 
 class LoginController
 {
-    public function __construct($data)
+    /**
+     * Validate informated data to login user
+     *
+     * @param array $data Array data with login params
+     * @return JSON
+     */
+    public function __construct($data = [])
     {
-        if (empty($data) || empty($data['email']) || empty($data['password'])) {
-            return false;
-        }
-
         $arDataUser = (new UserModel())->loginUser($data);
         
         if (count($arDataUser) > 0) {

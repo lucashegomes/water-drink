@@ -5,6 +5,9 @@ require_once __DIR__ . '/../config/DBConnection.php';
 abstract class Model
 {
 
+    /**
+     * Check if table name was especified
+     */
     public final function __construct()
     {
         if (empty($this->_table)) {
@@ -12,8 +15,25 @@ abstract class Model
         }
     }
 
-    public function select($columns = [], $where = [], $join = [], $groupBy = [], $orderBy = [], $page = null)
-    {
+    /**
+     * Statement that defines the structure to select on tables 
+     *
+     * @param array $columns Query columns to return
+     * @param array $where Query conditions to filter
+     * @param array $join Query table joins
+     * @param array $groupBy Query groupings
+     * @param array $orderBy Query orderings
+     * @param int $page Query pagination
+     * @return array
+     */
+    public function select(
+        array $columns = [],
+        array $where = [],
+        array $join = [],
+        array $groupBy = [],
+        array $orderBy = [],
+        $page = null
+    ) {
         $query = "SELECT * FROM " . $this->_table;
 
         if (count($columns) > 0) {
@@ -46,7 +66,8 @@ abstract class Model
         }
 
         try {
-            $result = ($this->getDbConnection())->query($query)->fetchAll(PDO::FETCH_ASSOC);
+            $connection = new DBConnection();
+            $result = $connection->getConnection()->query($query)->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             $result[] = "PDOException: $e";
         } catch (Exception $e) {
@@ -56,8 +77,4 @@ abstract class Model
         return $result;
     }
 
-    protected function getDbConnection()
-    {
-        return (new DBConnection())->getConnection();
-    }
 }

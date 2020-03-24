@@ -7,64 +7,108 @@ include_once('./src/controllers/DrinksByUserController.php');
 
 $url = 'http://localhost:8080/';
 $endpoint = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
 $request = str_replace($url, '', $endpoint);
 $request = explode('/', strtolower($request));
+
+/**
+ * Request HTTP verb method 
+ */
 $request['method'] = $_SERVER['REQUEST_METHOD'];
 
+/**
+ * Get token param from the request header if exists
+ */
 if (isset($_SERVER['HTTP_TOKEN'])) {
     $request['token'] = $_SERVER['HTTP_TOKEN'];
 }
 
-function messageError($mensagem = '', $httpResponseCode = 500)
+/**
+ * Print a message error in JSON format, setting the HTTP response code
+ *
+ * @param string $message Param with the string error set 
+ * @param integer $httpResponseCode Param to set the code of HTTP response
+ * @return void
+ */
+function messageError($message = '', $httpResponseCode = 500)
 {
-    if ($mensagem) {
+    if ($message) {
         http_response_code($httpResponseCode);
         echo json_encode([
-            'mensagem' => $mensagem
+            'mensagem' => $message
         ]);
 
         die();
     }
 }
 
+/**
+ * Validate if param token exists on the header request
+ *
+ * @return void
+ */
 function checkToken()
 {
     if (empty($request['token'])) {
-        messageError("Usu·rio n„o autenticado. Informar o token para continuar.");
+        messageError("Usu√°rio n√£o autenticado. Informar o token para continuar.");
     }
 }
 
+/**
+ * Convert params from JSON to array
+ */
 $data = json_decode(file_get_contents('php://input'), true);
 
+/**
+ * Direct URL endpoint routes to the especific controller
+ */
 if ($request[0] == 'users') {
 
     if (isset($request[1]) && is_numeric($request[1])) {
         checkToken();
+        /**
+         * Register quantity of water drinked
+         */
         if ($request['method'] == 'POST' && $request[2] == 'drink') {
             return (new DrinksByUserController())->increaseDrinkAction($request['token'], $data);
         }
 
+        /**
+         * Get data from especific user
+         */
         if ($request['method'] == 'GET') {
             return (new UserController())->indexAction($request[1], $request['token']);
         }
 
+        /**
+         * Edit especific user
+         */
         if ($request['method'] == 'PUT') {
             return (new UserController())->putAction($request['token'], $data);
         }
 
+        /**
+         * Remove especific user
+         */
         if ($request['method'] == 'DELETE') {
             return (new UserController())->deleteAction($request[1]);
         }
     }
 
+    /**
+     * Create a new user if all data required was set on request entry
+     */
     if ($request['method'] == 'POST') {
         if ($data['email'] && $data['name'] && $data['password']) {
             return (new UserController())->postAction($data);
         } else {
-            messageError("Para cadastrar um novo usu·rio ser· necess·rio informar os par‚metros name, email e password.");
+            messageError("Para cadastrar um novo usu√°rio ser√° necess√°rio informar os par√¢metros name, email e password.");
         }
     }
 
+    /**
+     * Get all users with / without pagination
+     */
     if ($request['method'] == 'GET') {
         checkToken();
         $page = ($request[1] == 'pagina' && isset($request[2]) && is_numeric($request[2])) ? $request[2] : null;
@@ -72,22 +116,34 @@ if ($request[0] == 'users') {
     }
 }
 
+/**
+ * Login user if required data is on the request
+ */
 if ($request[0] == 'login' && $request['method'] == 'POST') {
     if (!$data['email']) {
-        messageError("Email n„o informado.");
+        messageError("Email n√£o informado.");
     } elseif (!$data['password']) {
-        messageError("Senha n„o informada.");
+        messageError("Senha n√£o informada.");
     } else {
         return new LoginController($data);
     }
 }
 
+/**
+ * Get miligram ranking of current date
+ */
 if ($request[0] == 'ranking' && $request['method'] == 'GET') {
     return (new DrinksByUserController())->userRankingAction();
 }
 
+/**
+ * Get user drink history
+ */
 if ($request[0] == 'history' && isset($request[1]) && $request['method'] == 'GET') {
     return (new DrinksByUserController())->userHistoryAction($request[1]);
 }
 
-messageError("Endpoint n„o encontrado", 404);
+/**
+ * Dispatch 404 if endpoint not found
+ */
+messageError("Endpoint n√£o encontrado", 404);

@@ -1,7 +1,19 @@
 ﻿<?php
 
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Max-Age: 3600");
+header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
 class DrinksByUserController
 {
+    /**
+     * Increase drink count and set current user miligram
+     *
+     * @param [type] $token key to authenticate / find user
+     * @param array $data
+     * @return JSON
+     */
     public function increaseDrinkAction($token, $data = [])
     {
         try {
@@ -28,6 +40,11 @@ class DrinksByUserController
 
     }
 
+    /**
+     * Get ranking of miligram drinked on today
+     *
+     * @return JSON
+     */
     public function userRankingAction()
     {
         try {
@@ -41,6 +58,12 @@ class DrinksByUserController
         echo json_encode($response);
     }
 
+    /**
+     * Get user drink history
+     *
+     * @param $idUser User identity
+     * @return JSON
+     */
     public function userHistoryAction($idUser)
     {
         try {
