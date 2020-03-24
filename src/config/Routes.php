@@ -134,6 +134,7 @@ if ($request[0] == 'login' && $request['method'] == 'POST') {
  * Get miligram ranking of current date
  */
 if ($request[0] == 'ranking' && $request['method'] == 'GET') {
+    checkToken($request['token']);
     return (new DrinksByUserController())->userRankingAction();
 }
 
@@ -141,6 +142,7 @@ if ($request[0] == 'ranking' && $request['method'] == 'GET') {
  * Get user drink history
  */
 if ($request[0] == 'history' && isset($request[1]) && $request['method'] == 'GET') {
+    checkToken($request['token']);
     return (new DrinksByUserController())->userHistoryAction($request[1]);
 }
 
